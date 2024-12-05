@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+
+{% extends "index.html" %}
+
+{% block content %}
+<div class="container-fluid primary">  
+    <div class="row">
+        <div class="col-md-5 login-container">
+            <div class="login-wrapper">
+                <div class="header-wrapper"><a class="navbar-logo" href="{{ url_for('index') }}">
+                    <img src="{{ url_for('static', filename='img/gps.png') }}" width="30" height="auto" class="d-inline-block align-top" alt="">
+                    Router
+                  </a></div>
+                <h2>Login now</h2>
+                {% if error %}
+                <div class="alert alert-danger" role="alert">
+                    {{ error }}
+                </div>
+                {% endif %}
+                <form method="post" action="" role="form">
+                    {{ form.hidden_tag() }}
+                    <div class="form-group">
+                    {{ form.username.label }}:
+                    {{ form.username(class="form-control loginform", role="textbox", placeholder="Enter your username")}}
+                    </div>
+                    <div class="form-group">
+                    {{ form.pw.label }}:
+                    {{ form.pw(class="form-control loginform", role="textbox", placeholder="Enter your password") }}
+                    </div>
+                    <div class="form-group">
+                    {{ form.submit(class="btn btn-primary", role="button") }}
+                    </div>
+                    <p>Don't have an account? <a class="bold" href="../register" role="button">Register</a></p>
+                </form>
+            </div>
+        </div>
+        <div class="col-md-7 map-container">
+            <img src="{{ url_for('static', filename='img/map.jpg') }}" alt="GPS Map" class="img-fluid">
+        </div>
+    </div>
+</div>
+
+{% endblock %}

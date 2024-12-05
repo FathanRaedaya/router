@@ -1,0 +1,160 @@
+{% extends 'index.html' %}
+
+{% block title %} GPS Project {% endblock %}
+
+{% block content %}
+<div class="container-fluid" id="profile-body" role="main">
+  <div name="viewport" content="width=device-width, initial-scale=1" id="profile">
+    <div class="profile-navbar" role="navigation">
+      <nav class="navbar navbar-expand-lg navbar-light">
+        <a class="navbar-logo" href="{{ url_for('index') }}" aria-label="Homepage">
+          <img src="{{ url_for('static', filename='img/gps.png') }}" width="33" height="27" class="d-inline-block align-top" alt="GPS Icon" />
+          Router
+        </a>
+        <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+          <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse justify-content-end" id="navbarNav">
+          <ul class="navbar-nav" role="menubar">
+            <li class="nav-item active" role="menuitem">
+              <a class="nav-link" href="{{ url_for('index') }}" aria-current="page">Home</a>
+            </li>
+            {% if current_user.is_authenticated %}
+            <li class="nav-item" role="menuitem">
+              <a class="nav-link" href="{{ url_for('users') }}">Users</a>
+            </li>
+            <li class="nav-item" role="menuitem">
+              <a class="nav-link current" href="{{ url_for('profile') }}">Profile <span class="sr-only">(current)</span></a>
+            </li>
+            {% if is_subscribed %}
+            <li class="nav-item" role="menuitem">
+              <a class="nav-link" href="{{ url_for('map') }}">Maps</a>
+            </li>
+            {% else %}
+            {% if current_path == '/'%}
+            <li class="nav-item" role="menuitem">
+              <a class="nav-link" href="#subscription_panel">Subscribe</a>
+            </li>
+            {%else%}
+            <li class="nav-item" role="menuitem">
+              <a class="nav-link" href="{{ url_for('index') }}#subscription_panel">Subscribe</a>
+            </li>
+            {%endif%}
+            {% endif %}
+            <li class="nav-item" role="menuitem">
+              <a class="nav-link" href="{{ url_for('logout') }}">Logout</a>
+            </li>
+            {% else %}
+            <li class="nav-item" role="menuitem">
+              <a class="nav-link" href="{{ url_for('login') }}">Log In</a>
+            </li>
+            <li class="nav-item" role="menuitem">
+              <a class="nav-link" href="{{ url_for('register') }}" id="signup-btn">Sign Up</a>
+            </li>
+            {% endif %}
+          </ul>
+        </div>
+      </nav>
+    </div>
+    <h1 id="profile-heading">Profile: {{ current_user.username }}</h1>
+    <div class="row" role="region" aria-labelledby="profile-heading">
+      <div class="container">
+        <div class="col-8 col-sm-6">
+          <h2>Profile Information</h2>
+          <p>
+              <strong>Username:</strong> {{ current_user.username }}
+          </p>
+          <p>
+              <strong>First Name:</strong> {{ current_user.fName }}
+          </p>
+          <p>
+              <strong>Last Name:</strong> {{ current_user.lName }}
+          </p>
+          <p>
+              <strong>Email:</strong> {{ current_user.email }}
+          </p>
+        </div>
+      </div>
+      <div class="container">
+        <div class="col-4 col-sm-6">
+          <h2>Subscription Information</h2>
+          <p>
+              <strong>Subscribed:</strong> {% if is_subscribed %}Yes{% else %}No{% endif %}
+          </p>
+          <p>
+              <strong>Subscription Start:</strong> {{ is_subscribed.date }}
+          </p>
+          <p>
+              <strong>Subscription End:</strong> N/A
+          </p>
+          <p>
+              <strong>Subscription Plan:</strong> {{ is_subscribed.subscription }}
+          </p>
+        </div>
+      </div>
+    </div>
+    <div class="row" id="plans" role="region">
+      <div class="container">
+        <div class="col-md-6">
+          <h3 id="change-username-heading">Change Username</h3>
+          <form method="POST" action="{{ url_for('change_username') }}">
+              {{ userForm.hidden_tag() }}
+              <div class="form-group">
+              {{ userForm.username1.label }}
+              {{ userForm.username1(class="form-control") }}
+              </div>
+              <div class="form-group">
+              {{userForm.username2.label}}
+              {{ userForm.username2(class="form-control") }}
+              </div>
+              <div class="form-group">
+              {{ userForm.submit(class="btn btn-primary") }}
+              </div>
+          </form>
+        </div>
+        <div class="col-md-6">
+          <h3 id="change-password-heading">Change Password</h3>
+          <form method="POST" action="{{ url_for('change_password') }}">
+              {{ passForm.hidden_tag() }}
+              <div class="form-group">
+              {{ passForm.pw.label }}
+              {{ passForm.pw(class="form-control") }}
+              </div>
+              <div class="form-group">
+              {{passForm.pw2.label}}
+              {{ passForm.pw2(class="form-control") }}
+              </div>
+              <div class="form-group">
+              {{ passForm.submit(class="btn btn-primary") }}
+              </div>
+          </form>
+        </div>
+      </div>
+      <div class="container" id="manage-routes" role="region" aria-labelledby="manage-routes-heading">
+        <div class="col-12">
+          <h3 id="manage-routes-heading">Manage Routes</h3>
+          <div class="row" id="routes">
+            {% for map in mapdata%}
+              <div class="col-9">
+                <h3>{{ map.description }}</h3>
+                <p><strong>date:</strong> {{ map.date }}</p>
+              </div>
+              <div class="col-2">
+                <a href="{{ url_for('delete_route', route_id=map.id) }}" class="btn btn-danger">Delete</a>
+              </div>
+            {% endfor %}
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="row" id="del-btns" role="region">
+      <div class="mt-4">
+        <a href="{{ url_for('delete_all_routes') }}" class="btn btn-danger" aria-label="Delete All Routes">Delete All Routes</a>
+      </div>
+      <div class="mt-4">
+        <a href="{{ url_for('delete_account') }}" class="btn btn-danger" aria-label="Delete Account">Delete Account</a>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

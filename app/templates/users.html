@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+
+{% extends 'index.html' %}
+
+{% block content %}
+<body class="user-body">
+    <div class="user">
+        <div class="user-navbar" id="user-navbar">
+            <nav class="navbar navbar-expand-sm">
+            <a class="navbar-logo" href="{{ url_for('index') }}">
+                <img
+                src="{{ url_for('static', filename='img/gps.png') }}"
+                width="33"
+                height="27"
+                class="d-inline-block align-top"
+                alt="GPS Icon" />
+                Router
+            </a>
+            <button
+                class="navbar-toggler"
+                type="button"
+                data-toggle="collapse"
+                data-target="#navbarNav"
+                aria-controls="navbarNav"
+                aria-expanded="false"
+                aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse justify-content-end" id="navbarNav">
+                <ul class="navbar-nav">
+                {% if current_user.is_authenticated %}
+                <li class="nav-item">
+                    <a class="nav-link" href="{{ url_for('index') }}"
+                    >Home <span class="sr-only">(current)</span></a>
+                </li>
+                <li class="nav-item active">
+                    <a class="nav-link current" href="{{ url_for('users') }}">Users</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="{{ url_for('profile') }}">Profile</a>
+                </li>
+                {% if is_subscribed %}
+                <li class="nav-item">
+                <a class="nav-link" href="{{ url_for('map') }}">Maps</a>
+                </li>
+                {% else %}
+                {% if current_path == '/'%}
+                <li class="nav-item">
+                <a class="nav-link" href="#subscription_panel">Subscribe</a>
+                </li>
+                {%else%}
+                <li class="nav-item">
+                <a class="nav-link" href="{{ url_for('index') }}#subscription_panel">Subscribe</a>
+                </li>
+                {%endif%}
+                {% endif %}
+                <li class="nav-item">
+                    <a class="nav-link" href="{{ url_for('logout') }}">Logout</a>
+                </li>
+                {% else %}
+                <li class="nav-item">
+                    <a class="nav-link" href="{{ url_for('login') }}">Log In</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="{{ url_for('register') }}" id="signup-btn">Sign Up</a>
+                </li>
+                {% endif %}
+                </ul>
+            </div>
+            </nav>
+        </div>
+        
+        <div class="container">
+            <h2>Users</h2>
+            <div class="row">
+                {% for user_info in users_info %}
+                {% if not user_info.user.admin %}
+                <div class="col-md-4 small-container">
+                    <div class="user-card">
+                        <div class="card-body">
+                            <h5 class="card-title">{{ user_info.user.username }}</h5>
+                            {% if user_info.followed_by and user_info.is_following %}
+                            <span class="badge badge-friends">Friends</span>
+                            {% elif user_info.followed_by %}
+                            <span class="badge badge-followed">Following you</span>
+                            {% elif user_info.is_following %}
+                            <span class="badge badge-warning">Followed by you</span>
+                            {% endif %}
+                            <p class="card-text">Some info about the user.</p>
+                            {% if not user_info.is_following %}
+                                <a href="{{ url_for('follow', friend_id=user_info.user.id) }}" class="btn btn-primary">Follow</a>
+                            {% else %}
+                                <a href="{{ url_for('unfollow', friend_id=user_info.user.id) }}" class="btn btn-secondary">Unfollow</a>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+                {% endif %}
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+</body>
+{% endblock %}

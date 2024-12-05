@@ -1,0 +1,280 @@
+{% extends 'index.html' %} {% block title %} GPS Project {% endblock %} {% block
+content %}
+<div class="container-fluid" id="landing-fluid">
+  <nav class="navbar navbar-expand-sm">
+    <a class="navbar-logo" href="{{ url_for('index') }}">
+      <img
+        src="{{ url_for('static', filename='img/gps.png') }}"
+        width="33"
+        height="27"
+        class="d-inline-block align-top"
+        alt="GPS Icon" />
+      Router
+    </a>
+    <button
+      class="navbar-toggler"
+      type="button"
+      data-toggle="collapse"
+      data-target="#navbarNav"
+      aria-controls="navbarNav"
+      aria-expanded="false"
+      aria-label="Toggle navigation">
+      <span class="bx bx-menu"></span>
+    </button>
+    <div class="collapse navbar-collapse justify-content-end" id="navbarNav">
+      <ul class="navbar-nav">
+        <li class="nav-item active">
+          <a class="nav-link current" href="#"
+            >Home <span class="sr-only">(current)</span></a
+          >
+        </li>
+        {% if current_user.is_authenticated %}
+        <li class="nav-item">
+          <a class="nav-link" href="{{ url_for('users') }}">Users</a>
+        </li>
+        <li class="nav-item">
+            <a class="nav-link" href="{{ url_for('profile') }}">Profile</a>
+          </li>
+        {% if is_subscribed %}
+        <li class="nav-item">
+          <a class="nav-link" href="{{ url_for('map') }}">Maps</a>
+        </li>
+        {% else %}
+        <li class="nav-item">
+          <a class="nav-link" href="#subscription_panel">Subscribe</a>
+        </li>
+        {% endif %}
+        <li class="nav-item">
+          <a class="nav-link" href="{{ url_for('logout') }}">Logout</a>
+        </li>
+        {% else %}
+        <li class="nav-item">
+          <a class="nav-link" href="{{ url_for('login') }}">Log In</a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link" href="{{ url_for('register') }}" id="signup-btn">Sign Up</a>
+        </li>
+        {% endif %}
+      </ul>
+    </div>
+  </nav>
+  <div class="landing-container">
+    <h1>All you need to track your journeys</h1>
+    <p>
+      Discover a new way to document and share your adventures with our GPS tracking tool.
+    </p>
+    {% if not current_user.is_authenticated %}
+    <a
+      class="get-started current"
+      href="{{ url_for('register') }}"
+      role="button"
+      >Get Started</a
+    >
+    {% elif not is_subscribed %}
+    <a
+      class="get-started current"
+      href="#subscription_panel"
+      role="button"
+      >Subscribe to join</a>
+    {% else %}
+    <a
+      class="get-started current"
+      href="{{ url_for('map') }}"
+      role="button"
+      >View Maps</a>
+    {% endif %}
+  </div>
+</div>
+<div
+  class="container-fluid justify-content-around"
+  id="feature-fluid">
+  <h2 class="text-center">Features</h2>
+  <div class="features-container d-flex justify-content-around">
+    <div class="feature-item col-lg-4 text-center shadow p-5">
+      <div class="feature">
+        <i class="fas fa-map-marked-alt fa-3x"></i>
+        <h3>Track Your Routes</h3>
+        <p>
+          Keep track of your routes and never get lost again. Explore and record
+          every journey with ease.
+        </p>
+      </div>
+    </div>
+
+    <div class="feature-item col-lg-4 text-center shadow p-5">
+      <div class="feature">
+        <i class="fas fa-cloud-upload-alt fa-3x"></i>
+        <h3>Upload GPS Data</h3>
+        <p>
+          Effortlessly upload your GPS data to capture every detail of your
+          travels. Support for various formats ensures compatibility and ease of
+          use.
+        </p>
+      </div>
+    </div>
+
+    <div class="feature-item col-lg-4 text-center shadow p-5">
+      <div class="feature">
+        <i class="fas fa-map-signs fa-3x"></i>
+        <h3>Preview on Map</h3>
+        <p>
+          Instantly view your uploaded routes on a map. Zoom in to see detailed
+          pathways, landmarks, and important waypoints of your adventures.
+        </p>
+      </div>
+    </div>
+  </div>
+</div>
+<div class="price-section justify-content-around">
+        <div class="pricing-container" id="subscription_panel">
+           <h1>Choose a plan that works for you</h1>
+            <p>The longer you choose, the more you get.</p> 
+        </div>
+        <div class="plan-container">
+          <div class="col-lg-3 sub-container">
+              <div class="card">
+                  <div class="card-header">
+                      Weekly Plan
+                      <h5 class="card-title"><span class="bigger">$1.99/</span>week</h5>
+                      {% if not is_subscribed %}
+                      {% if current_user.is_authenticated %}
+                      <a class="btn btn-primary" data-toggle="modal" data-target="#paymentModal" href="#" data-plan="1">Continue</a>
+                      {% else %}
+                      <a class="btn btn-primary" href="{{ url_for('login') }}">Login to Subscribe</a>
+                      {% endif %}
+                      {% elif plan == 1 %}
+                      <a class="btn btn-danger" href="{{ url_for('cancel') }}">Cancel Subscription</a>
+                      {% else %}
+                      <a class="btn btn-primary" href="{{ url_for('update_plan', plan_id=1) }}">Change Subscription</a>
+                      {% endif %}
+                  </div>
+                  <ul class="list-group">
+                      <li class="list-group-item">Save up to 5 routes</li>
+                      <li class="list-group-item">Add up to 5 friends</li>
+                      <li class="list-group-item">Access your local town</li>
+                      <li class="list-group-item no">AI driven suggestions</li>
+                  </ul>
+              </div>
+          </div>
+          <div class="col-lg-3 sub-container">
+              <div class="card">
+                  <div class="card-header">
+                      Annual Plan
+                      <h5 class="card-title"><span class="bigger">$59.99/</span>year</h5>
+                      {% if not is_subscribed %}
+                      {% if current_user.is_authenticated %}
+                      <a class="btn btn-primary" data-toggle="modal" data-target="#paymentModal" href="#" data-plan="3">Continue</a>
+                      {% else %}
+                      <a class="btn btn-primary" href="{{ url_for('login') }}">Login to Subscribe</a>
+                      {% endif %}
+                      {% elif plan == 3 %}
+                      <a class="btn btn-danger" href="{{url_for('cancel')}}">Cancel Subscription</a>
+                      {% else %}
+                      <a class="btn btn-primary" href="{{ url_for('update_plan', plan_id=3) }}">Change Subscription</a>
+                      {% endif %}
+                  </div>
+                  <ul class="list-group">
+                      <li class="list-group-item">Save unlimited routes</li>
+                      <li class="list-group-item">Add unlimited friends</li>
+                      <li class="list-group-item">Access everywhere, anywhere</li>
+                      <li class="list-group-item">AI driven suggestions</li>
+                      <li class="list-group-item">Early access to future updates</li>
+                      <li class="list-group-item space"></li>
+                  </ul>
+              </div>
+          </div>
+          <div class="col-lg-3 sub-container">
+              <div class="card">
+                  <div class="card-header">
+                      Monthly Plan
+                      <h5 class="card-title"><span class="bigger">$6.49/</span>month</h5>
+                      {% if not is_subscribed %}
+                      {% if current_user.is_authenticated %}
+                      <a class="btn btn-primary" data-toggle="modal" data-target="#paymentModal" href="#" data-plan="2">Continue</a>
+                      {% else %}
+                      <a class="btn btn-primary" href="{{ url_for('login') }}">Login to Subscribe</a>
+                      {% endif %}
+                      {% elif plan == 2 %}
+                      <a class="btn btn-danger" href="{{url_for('cancel')}}">Cancel Subscription</a>
+                      {% else %}
+                      <a class="btn btn-primary" href="{{ url_for('update_plan', plan_id=2) }}">Change Subscription</a>
+                      {% endif %}
+                  </div>
+                  <ul class="list-group">
+                      <li class="list-group-item">Save up to 25 routes</li>
+                      <li class="list-group-item">Add up to 20 friends</li>
+                      <li class="list-group-item">Access your country</li>
+                      <li class="list-group-item">AI driven suggestions</li>
+                      <li class="list-group-item no">Early access to future updates</li>
+                  </ul>
+              </div>
+          </div>   
+        </div>   
+    </div>
+  <div class="modal fade" id="paymentModal" tabindex="-1" role="dialog" aria-labelledby="paymentModalLabel" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="paymentModalLabel">Payment Details</h5>
+          <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+            <span aria-hidden="true">&times;</span>
+          </button>
+        </div>
+        <div class="modal-body">
+          <form method="post" action="{{ url_for('payment', plan=1) }}" enctype="multipart/form-data">
+            {{ form.hidden_tag() }}
+            <div class="form-group-pay">
+                {{ form.fName.label }}
+                {{ form.fName(required=True) }}
+            </div>
+            <div class="form-group-pay">
+                {{ form.lName.label }}
+                {{ form.lName(required=True) }}
+            </div>
+            <div class="form-group-pay">
+                {{ form.cardNum.label }}
+                {{ form.cardNum(pattern="\\d*", maxlength=16, required=True, title="Card number must be 16 digits.") }}
+            </div>
+            <div class="form-group-pay">
+                {{ form.expirationM.label }}
+                {{ form.expirationM(type="number", min=1, max=12, required=True, title="Enter a valid month.") }}
+            </div>
+            <div class="form-group-pay">
+                {{ form.expirationY.label }}
+                {{ form.expirationY(type="number", min=2020, required=True, title="Enter a valid year.") }}
+            </div>
+            <div class="form-group-pay">
+                {{ form.cvv.label }}
+                {{ form.cvv(pattern="\\d{3,4}", required=True, title="CVV must be 3 or 4 digits.") }}
+            </div>
+            <div class="form-group-pay">
+                {{ form.country.label }}
+                {{ form.country(required=True) }}
+            </div>
+            <div class="form-group-pay">
+                {{ form.city.label }}
+                {{ form.city(required=True) }}
+            </div>
+            <div class="form-group-pay">
+                {{ form.stAddr.label }}
+                {{ form.stAddr(required=True) }}
+            </div>
+            <div class="form-group-pay">
+                {{ form.stAddr2.label }}
+                {{ form.stAddr2() }}
+            </div>
+            <div class="form-group-pay">
+                {{ form.pc.label }}
+                {{ form.pc(required=True) }}
+            </div>
+            <div class="form-group-pay">
+                {{ form.submit(class="btn btn-secondary", role="button") }}
+            </div>
+        </form>
+        
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

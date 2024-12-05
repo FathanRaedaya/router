@@ -1,0 +1,195 @@
+{% extends 'index.html' %}
+
+{% block title %}
+GPS Project
+{% endblock %}
+
+{% block content %}
+<div id="map"></div> 
+
+<div class="sidebar">
+    <box-icon name='menu' size="md" id="sidebar-btn"></box-icon>
+    <ul>
+        <li>
+
+            <a href="{{ url_for('index') }}">
+                <box-icon name='home' size="md"></box-icon>
+                <span class="sidebar-itm">Home</span>
+            </a>
+        </li>
+        <li>
+            <a data-toggle="modal" data-target="#uploadModal">
+                <box-icon name='upload' size="md"></box-icon>
+                <span class="sidebar-itm">Upload Route</span>
+            </a>
+        </li>
+        <li>
+            <a data-toggle="modal" data-target="#downloadModal">
+                <box-icon name='download' size="md"></box-icon>
+                <span class="sidebar-itm">Download Route</span>
+            </a>
+        </li>
+        <li>
+            <a data-toggle="modal" data-target="#friendsModal">
+                <box-icon name='group' size="md"></box-icon>
+                <span class="sidebar-itm">Friends' Routes</span>
+            </a>
+        </li>
+    </ul>
+</div>
+
+<a class="profile-btn" href="{{ url_for('profile') }}"><i class='bx bx-user-circle'></i>  {{ user.username }}</a>
+
+
+{% if error %}
+<div class="alert alert-danger" role="alert">
+    {{ error }}
+</div>
+{% endif %}   
+
+
+<div class="modal fade" id="friendsModal" tabindex="-1" role="dialog" aria-labelledby="uploadModalLabel" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="friendsModalLabel">View Friends' Routes</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <ul class="list-group">
+                    {% for friend in friends %}
+                        <li class="list-item">
+                            <div class="form-check">
+                                <input class="form-check-input friend-checkbox" type="checkbox" id="friend{{ friend.id }}" value="{{ friend.id }}">
+                                <label class="form-check-label friend-label" for="friend{{ friend.id }}">{{ friend.username }}</label>
+                            </div>
+                        </li>
+                    {% endfor %}
+                </ul>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="downloadModal" tabindex="-1" role="dialog" aria-labelledby="uploadModalLabel" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="downloadModal">Download Map Data</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <ul class="download-list">
+                    {% for file in files %}
+                        <li class="dl-list-item">
+                            <div>
+                                <h2>{{ file.description }}</h2>
+                                <p>{{ file.date }}</p>
+                            </div>
+                            <div>
+                                <a href="{{ url_for('download', file_id=file.id) }}" class="download-btn bx bxs-download">Download</a>
+                            </div>
+                        </li>
+                    {% endfor %}
+                </ul>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="uploadModal" tabindex="-1" role="dialog" aria-labelledby="uploadModalLabel" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="uploadModalLabel">Upload Map Data</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <form method="POST" action="{{ url_for('upload') }}" enctype="multipart/form-data">
+                    {{ form.hidden_tag() }}
+                    <div class="form-group">
+                        {{ form.route.label }}
+                        {{ form.route(class='form-control') }}
+                    </div>
+                    <div class="form-group">
+                        {{ form.description.label }}
+                        {{ form.description(class='form-control') }}
+                    </div>
+                    <div>
+                        {{ form.share.label }}
+                        {{ form.share(class="form-control friend-select", multiple="multiple", data_live_search="true") }}
+                    </div>
+                        
+                    
+                    <script>
+                    $(document).ready(function() {
+                        // Initialize select picker
+                        $('#share').selectpicker();
+                        
+                        // Array to store previously selected values
+                        let prevSelected = [];
+
+                        // Flag to ignore change event during programmatic value change
+                        let ignoreChange = false;
+
+                        // Event handler for change event on selectpicker
+                        $('#share').on('changed.bs.select', function(e) {
+                            // If change event should be ignored, return
+                            if (ignoreChange) return;
+
+                            // Get currently selected values
+                            let selectedValues = $(this).val();
+                            console.log(selectedValues);
+
+                            // Handle special cases "-1" and "-2"
+                            // -1 is All, -2 is Only Me
+                            if (selectedValues.includes("-1") && !prevSelected.includes("-1")) {
+                                ignoreChange = true;
+                                $(this).selectpicker('deselectAll'); // Deselect all options
+                                $(this).selectpicker('val', "-1");   // Set value to "-1"
+                                $(this).selectpicker('refresh');     // Refresh selectpicker
+                                ignoreChange = false;
+                            } else if (selectedValues.includes("-2") && !prevSelected.includes("-2")) {
+                                ignoreChange = true;
+                                $(this).selectpicker('deselectAll'); // Deselect all options
+                                $(this).selectpicker('val', "-2");   // Set value to "-2"
+                                $(this).selectpicker('refresh');     // Refresh selectpicker
+                                ignoreChange = false;
+                            } else {
+                                // Clear special options if something a user is selected
+                                ignoreChange = true;
+                                $(this).find('option[value="-1"]').prop('selected', false);
+                                $(this).find('option[value="-2"]').prop('selected', false);
+                                $(this).selectpicker('refresh');
+                                ignoreChange = false;
+                            }
+
+                            // Store current selected values for next comparison
+                            console.log(prevSelected);
+                            prevSelected = $(this).val();
+                        });
+                    });
+
+                    </script>
+                    <div class="form-group text-center">
+                        {{ form.submit(class="btn btn-primary") }}
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    // get gpx files in JSON format
+    let gpxFiles = {{ gpx_files | tojson }};
+</script>
+<script src="{{ url_for('static', filename='map.js') }}"></script>
+<script src="{{ url_for('static', filename='sidebar.js') }}"></script>
+{% endblock %}
