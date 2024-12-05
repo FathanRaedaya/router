@@ -1,3 +1,5 @@
+#### This project was developed as a collaborative effort by myself and 5 other students for a university module.
+
 ## Getting Started
 
 These instructions will get you a copy of the project up and running on your local machine for development and testing purposes.
